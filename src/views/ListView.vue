@@ -27,7 +27,10 @@ h2 {
 .places {
   margin-top: 20px;
   overflow: scroll;
-  max-height: 70%;
+  max-height: 80%;
+  @media screen and (max-width: 700px) {
+    max-height: 70%;
+  }
 }
 
 .place-card:last-of-type {
