@@ -1,0 +1,16 @@
+<svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <title>Marker</title>
+        <ellipse stroke-width="0" ry="249.49999" rx="249.49999" id="svg_1" cy="500" cx="500" stroke="#000"
+            fill="#509e2f" opacity="1">
+            <animate attributeName="rx" values="250;500" dur="1.5s" repeatCount="indefinite" calcMode="spline"
+                keySplines="0.22, 1, 0.36, 1" />
+            <animate attributeName="ry" values="250;500" dur="1.5s" repeatCount="indefinite" calcMode="spline"
+                keySplines="0.22, 1, 0.36, 1" />
+            <animate attributeName="opacity" values="1;0" dur="1.5s" repeatCount="indefinite" calcMode="spline"
+                keySplines="0.22, 1, 0.36, 1" />
+        </ellipse>
+        <ellipse stroke-width="0" ry="249.49999" rx="249.49999" id="svg_1" cy="500" cx="500" stroke="#000"
+            fill="#509e2f" />
+    </g>
+</svg>
