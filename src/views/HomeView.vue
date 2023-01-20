@@ -16,7 +16,7 @@ const latest = useDocument<Place>(doc(collection(db, "latest"), "latest"));
 <template>
   <UserDisplay />
   <div class="latest" v-if="latest">
-    <h3>Your latest visit:</h3>
+    <h3>Latest visit:</h3>
     <PlaceCard :place="(latest as Place)" hideVisits />
     <RouterLink to="list" class="list"
       ><CTA variant="secondary">View all <ArrowNarrowRightIcon /></CTA
