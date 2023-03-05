@@ -25,7 +25,6 @@ const db = useFirestore();
 
 const searchOptions = {
   bounds: BOUNDS,
-  types: ["bar", "cafe", "liquor_store", "casino", "restaurant"],
 };
 
 let queryString = "";
@@ -51,7 +50,6 @@ const handleQuery = async () => {
       ...searchOptions,
     },
     (res) => {
-      console.log(res);
       results.value = res ? res.slice(undefined, 5) : [];
       if (!results.value.some((r) => r.place_id === selected.value)) {
         selected.value = null;
