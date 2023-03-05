@@ -160,6 +160,11 @@ h5 {
   font-style: italic;
 }
 
+.predictions {
+  max-height: 50vh;
+  overflow: scroll;
+}
+
 .actions {
   position: absolute;
   bottom: 10px;
