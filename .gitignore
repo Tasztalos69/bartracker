@@ -31,3 +31,6 @@ coverage
 
 # Firebase
 *.cache
+
+# PWA Dev
+dev-dist/
