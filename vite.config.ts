@@ -27,8 +27,8 @@ const pwaOptions: Partial<VitePWAOptions> = {
         purpose: "any",
       },
     ],
-    theme_color: "#ffffff",
-    background_color: "#ffffff",
+    theme_color: "#efefef",
+    background_color: "#efefef",
     display: "standalone",
   },
 };
