@@ -20,6 +20,7 @@ const mapOptions: google.maps.MapOptions = {
   zoom: DEFAULT_ZOOM,
   center: CENTER,
   disableDefaultUI: true,
+  clickableIcons: false,
   restriction: {
     latLngBounds: BOUNDS,
   },
