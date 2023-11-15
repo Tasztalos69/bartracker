@@ -1,10 +1,15 @@
 <script setup lang="ts">
-import { signOut } from "firebase/auth";
+import { OAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { useCurrentUser, useFirebaseAuth } from "vuefire";
 import { UserCircleIcon, LogoutIcon } from "vue-tabler-icons";
 
 const auth = useFirebaseAuth()!;
 const user = useCurrentUser();
+
+const provider = new OAuthProvider("oidc.wanter-id");
+
+const login = () =>
+  signInWithPopup(auth, provider).then(console.log).catch(console.error);
 
 const logout = () => {
   signOut(auth);
@@ -16,9 +21,9 @@ const logout = () => {
     <UserCircleIcon />
     <span />
   </div>
-  <div class="user-unauth" v-if="user === null">
+  <div class="user-unauth" v-if="user === null" @click="login">
     <UserCircleIcon />
-    <RouterLink to="login">Log in</RouterLink>
+    <p>Log in</p>
   </div>
   <div class="user" v-if="user">
     <img v-if="user.photoURL" :src="user.photoURL" />
@@ -41,17 +46,14 @@ const logout = () => {
   margin-bottom: 20px;
   display: flex;
   align-items: center;
+  cursor: pointer;
 
   svg {
     margin-right: 10px;
   }
 
-  button {
-    width: 24px;
-    height: 24px;
-    svg {
-      margin: 0;
-    }
+  p {
+    font-weight: 700;
   }
 }
 
@@ -75,17 +77,17 @@ const logout = () => {
   }
 }
 
-.user-unauth {
-  a {
-    text-decoration: none;
-    font-weight: 700;
-  }
-}
-
 .user {
   h4 {
     flex-grow: 1;
     font-weight: 600;
+  }
+
+  img {
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    margin-right: 10px;
   }
 }
 
