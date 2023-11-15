@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Timestamp } from "firebase/firestore";
+import type { Visit } from "@/types";
 import { ref, type PropType } from "vue";
 import { XIcon } from "vue-tabler-icons";
 import { useCurrentUser } from "vuefire";
@@ -7,7 +7,7 @@ import { useCurrentUser } from "vuefire";
 const user = useCurrentUser();
 
 const props = defineProps({
-  visit: { type: Object as PropType<Timestamp>, required: true },
+  visit: { type: Object as PropType<Visit>, required: true },
 });
 
 const emit = defineEmits(["delete"]);
@@ -27,7 +27,7 @@ const handleDelete = () => {
 
 <template>
   <li>
-    {{ props.visit.toDate().toLocaleDateString("hu-HU") }}
+    {{ props.visit.date.toDate().toLocaleDateString("hu-HU") }}
     <button type="button" @click="handleDelete">
       <XIcon v-if="user" :class="{ confirm: deleteMode }" />
     </button>

@@ -6,6 +6,4 @@ const loader = new Loader({
   libraries: ["places"],
 });
 
-const useGoogle = async () => await loader.loadPromise();
-
-export default useGoogle;
+export default loader;

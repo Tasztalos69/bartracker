@@ -1,19 +1,52 @@
 <script setup lang="ts">
-/*global google */
-import { ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { RouterView } from "vue-router";
 import { Menu2Icon, Focus2Icon } from "vue-tabler-icons";
 import mapStyle from "./map-style.json";
 import markerIcon from "@/assets/marker.svg";
-import useGoogle from "./useGoogle";
 import { BOUNDS, CENTER, DEFAULT_ZOOM } from "@/constants";
 import store from "./store";
-import { useFirestore } from "vuefire";
-import { collection, onSnapshot, query } from "firebase/firestore";
+import {
+  useCollection,
+  useCurrentUser,
+  useFirebaseAuth,
+  useFirestore,
+} from "vuefire";
+import { collection, orderBy, query, where } from "firebase/firestore";
 import geoPointToLatLng from "./geoPointToLatLng";
-import type { Place } from "./types";
+import type { CompoundPlace, Visit } from "./types";
+import loader from "./useLoader";
 
 const db = useFirestore();
+const user = useCurrentUser();
+
+const isMenuOpen = ref(false);
+
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+};
+
+const auth = useFirebaseAuth();
+
+auth?.onAuthStateChanged((u) => {
+  if (!u) {
+    isMenuOpen.value = true;
+  }
+});
+
+const visitsRef = collection(db, "visits");
+
+const visitSource = computed(() =>
+  user.value
+    ? query(
+        visitsRef,
+        where("userId", "==", user.value.uid),
+        orderBy("date", "desc")
+      )
+    : null
+);
+
+const visits = useCollection<Visit>(visitSource);
 
 const mapOptions: google.maps.MapOptions = {
   styles: mapStyle,
@@ -26,68 +59,95 @@ const mapOptions: google.maps.MapOptions = {
   },
 };
 
-useGoogle().then(async (google) => {
-  store.map = new google.maps.Map(
-    document.getElementById("map") as HTMLElement,
-    mapOptions
-  );
+const glib = ref<google.maps.MapsLibrary | null>(null);
 
-  const q = query(collection(db, "places"));
-  onSnapshot(q, (querySnapshot) => {
-    // Clear markers
-    store.markers.forEach((m) => m.setMap(null));
-    store.markers = [];
-    store.places = [];
+onMounted(() =>
+  loader.importLibrary("maps").then((g) => {
+    glib.value = g;
 
-    querySnapshot.forEach((doc) => {
-      const place = doc.data();
-      store.places.push(place as Place);
+    store.map = new g.Map(
+      document.getElementById("map") as HTMLElement,
+      mapOptions
+    );
+  })
+);
 
-      // Create InfoWindow
-      const infoWindow = new google.maps.InfoWindow({
-        content: `
+const parseVisits = async () => {
+  store.places = [];
+
+  if (!user.value) {
+    redraw();
+    return;
+  }
+
+  visits.value.forEach((d: Visit) => {
+    const find = store.places.find((p) => p.place_id === d.place.place_id);
+
+    if (find) {
+      find.visits.push(d);
+    } else {
+      const obj = { ...d.place, visits: [d] } as CompoundPlace;
+      store.places.push(obj);
+    }
+  });
+
+  redraw();
+};
+
+const redraw = () => {
+  store.markers.forEach((m) => {
+    m.setMap(null);
+    m.setOpacity(0);
+  });
+  store.markers = [];
+  store.infoWindows = [];
+
+  store.places.forEach((place) => {
+    if (!glib.value) return;
+
+    // Create InfoWindow
+    const infoWindow = new glib.value.InfoWindow({
+      content: `
         <div class="info-window">
           <h3>${place.name}</h3>
           <h4>${place.formatted_address}</h4>
         </div>`,
-        ariaLabel: "ariaLabel",
-      });
-      store.infoWindows.push(infoWindow);
-
-      // Create Marker
-      const marker = new google.maps.Marker({
-        position: geoPointToLatLng(place.coords),
-        icon: {
-          url: markerIcon,
-          scaledSize: new google.maps.Size(20, 20),
-        },
-        map: store.map,
-        optimized: false,
-      });
-
-      marker.addListener("click", () => {
-        store.infoWindows.forEach((iw) => iw.close());
-        infoWindow.open({
-          anchor: marker,
-          map: store.map,
-        });
-      });
-
-      store.markers.push(marker);
+      ariaLabel: "ariaLabel",
     });
+    store.infoWindows.push(infoWindow);
+
+    // Create Marker
+    const marker = new google.maps.Marker({
+      position: place.coords ? geoPointToLatLng(place.coords) : null,
+      icon: {
+        url: markerIcon,
+        scaledSize: new google.maps.Size(20, 20),
+      },
+      map: store.map,
+      optimized: false,
+    });
+
+    marker.addListener("click", () => {
+      store.infoWindows.forEach((iw) => iw.close());
+      infoWindow.open({
+        anchor: marker,
+        map: store.map,
+      });
+    });
+
+    store.markers.push(marker);
   });
-});
+};
+
+onMounted(parseVisits);
+watch(user, parseVisits);
+watch(visits, parseVisits, { deep: true });
+watch(glib, redraw);
 
 const recenter = () => {
   if (!store.map) return;
   store.map.panTo(CENTER);
   store.map.setZoom(DEFAULT_ZOOM);
-};
-
-const isMenuOpen = ref(false);
-
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value;
 };
 </script>
 
@@ -222,3 +282,4 @@ nav,
   }
 }
 </style>
+./useLoader

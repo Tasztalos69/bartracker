@@ -1,34 +1,19 @@
 <script setup lang="ts">
 import type { PropType } from "vue";
-import type { Place } from "@/types";
-import {
-  collection,
-  deleteDoc,
-  doc,
-  Timestamp,
-  updateDoc,
-} from "firebase/firestore";
+import type { CompoundPlace, Visit } from "@/types";
+import { deleteDoc, doc } from "firebase/firestore";
 import { useFirestore } from "vuefire";
 import PlaceCardVisit from "./PlaceCardVisit.vue";
 
 const props = defineProps({
-  place: { type: Object as PropType<Place>, required: true },
+  place: { type: Object as PropType<CompoundPlace>, required: true },
   hideVisits: { type: Boolean, default: false },
 });
 
 const db = useFirestore();
 
-const handleDelete = (ts: Timestamp) => {
-  const docRef = doc(collection(db, "places"), props.place?.place_id);
-  if (props.place.visits.length === 1) {
-    deleteDoc(docRef);
-  } else {
-    updateDoc(docRef, {
-      visits: props.place.visits.filter(
-        (v) => v.toDate().getTime() !== ts.toDate().getTime()
-      ),
-    });
-  }
+const handleDelete = (deleted: Visit) => {
+  deleteDoc(doc(db, "visits", deleted.id));
 };
 </script>
 
@@ -40,7 +25,7 @@ const handleDelete = (ts: Timestamp) => {
       <PlaceCardVisit
         v-for="v in props.place.visits"
         :visit="v"
-        :key="v.toString()"
+        :key="v.date.toMillis()"
         @delete="() => handleDelete(v)"
       />
     </ul>

@@ -2,27 +2,48 @@
 import CTA from "@/components/CTA.vue";
 import PlaceCard from "@/components/PlaceCard.vue";
 import UserDisplay from "@/components/UserDisplay.vue";
-import type { Place } from "@/types";
-import { collection, doc } from "firebase/firestore";
+import type { Visit } from "@/types";
+import { collection, limit, orderBy, query, where } from "firebase/firestore";
+import { computed } from "vue";
 import { RouterLink } from "vue-router";
 import { PlusIcon, ArrowNarrowRightIcon } from "vue-tabler-icons";
-import { useDocument, useFirestore } from "vuefire";
+import { useCollection, useCurrentUser, useFirestore } from "vuefire";
 
 const db = useFirestore();
+const user = useCurrentUser();
 
-const latest = useDocument<Place>(doc(collection(db, "latest"), "latest"));
+const visitsRef = collection(db, "visits");
+
+const visitSource = computed(() =>
+  user.value
+    ? query(
+        visitsRef,
+        where("userId", "==", user.value.uid),
+        orderBy("date", "desc"),
+        limit(1)
+      )
+    : null
+);
+
+const visits = useCollection<Visit>(visitSource);
 </script>
 
 <template>
   <UserDisplay />
-  <div class="latest" v-if="latest">
+
+  <div class="latest" v-if="user && visits && visits[0]">
     <h3>Latest visit:</h3>
-    <PlaceCard :place="(latest as Place)" hideVisits />
-    <RouterLink to="list" class="list"
-      ><CTA variant="secondary">View all <ArrowNarrowRightIcon /></CTA
-    ></RouterLink>
+    <PlaceCard :place="{ ...visits[0].place, visits: [] }" hideVisits />
+    <RouterLink to="list" class="list">
+      <CTA variant="secondary"> View all <ArrowNarrowRightIcon /> </CTA>
+    </RouterLink>
   </div>
-  <RouterLink to="add" class="add"><PlusIcon />Record visit</RouterLink>
+  <div v-if="!user" class="invite">
+    <h5>Track your bar visits easily with Bartracker!</h5>
+  </div>
+  <RouterLink to="add" class="add" v-if="user">
+    <PlusIcon />Record visit
+  </RouterLink>
 </template>
 
 <style scoped lang="scss">
@@ -48,6 +69,23 @@ const latest = useDocument<Place>(doc(collection(db, "latest"), "latest"));
     .icon-tabler {
       margin-left: 10px;
     }
+  }
+}
+
+.invite {
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+
+  h5 {
+    font-weight: 700;
+    text-align: center;
+    font-size: 1.3rem;
+    line-height: 1.6rem;
+    color: $text-light;
+    font-style: italic;
   }
 }
 

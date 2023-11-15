@@ -1,27 +1,29 @@
 <script setup lang="ts">
 /*global google */
 import { BOUNDS } from "@/constants";
-import useGoogle from "@/useGoogle";
 import { ref, type Ref } from "vue";
 import PlaceCard from "@/components/ResultCard.vue";
 import FormInput from "@/components/FormInput.vue";
 import CTA from "@/components/CTA.vue";
 import { useRouter } from "vue-router";
 import store from "@/store";
-import type { Place } from "@/types";
-import { useFirestore } from "vuefire";
+import type { Place, VisitUpload } from "@/types";
+import { useCurrentUser, useFirestore } from "vuefire";
 import {
-  arrayUnion,
+  addDoc,
   collection,
   doc,
+  DocumentReference,
   GeoPoint,
+  getDocs,
   setDoc,
   Timestamp,
-  updateDoc,
 } from "firebase/firestore";
+import loader from "@/useLoader";
 
 const router = useRouter();
 const db = useFirestore();
+const user = useCurrentUser();
 
 const searchOptions = {
   bounds: BOUNDS,
@@ -60,9 +62,9 @@ const handleQuery = async () => {
 
 let service: google.maps.places.PlacesService;
 
-useGoogle().then((google) => {
+loader.importLibrary("places").then(({ PlacesService }) => {
   if (!store.map) return;
-  service = new google.maps.places.PlacesService(store.map);
+  service = new PlacesService(store.map);
 });
 
 let selected = ref<google.maps.places.PlaceResult | null>(null);
@@ -75,7 +77,7 @@ const handleSelect = (result: google.maps.places.PlaceResult | null) => {
   }
 };
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   const { name, formatted_address, geometry, place_id } = selected.value!;
   const now = Timestamp.fromMillis(Date.now());
 
@@ -87,17 +89,25 @@ const handleSubmit = () => {
       geometry?.location?.lat() ?? 0,
       geometry?.location?.lng() ?? 0
     ),
-    visits: [now],
   };
 
-  if (store.places.some((p) => p.place_id === selected.value?.place_id)) {
-    updateDoc(doc(collection(db, "places"), selected.value?.place_id), {
-      visits: arrayUnion(now),
-    });
-  } else {
-    setDoc(doc(db, "places", place_id!), filtered);
+  const placeIds = (await getDocs(collection(db, "places"))).docs.map(
+    (d) => (d.data() as Place).place_id
+  );
+
+  // If the place doesn't exist, create it
+  if (!placeIds.includes(selected.value?.place_id)) {
+    await setDoc(doc(db, "places", place_id!), filtered);
   }
-  setDoc(doc(db, "latest", "latest"), filtered);
+
+  const visitObj: VisitUpload = {
+    date: now,
+    place: doc(db, "places", place_id!) as DocumentReference<Place>,
+    userId: user.value!.uid,
+  };
+
+  await addDoc(collection(db, "visits"), visitObj);
+
   router.push("/add/success");
 };
 </script>
@@ -174,3 +184,4 @@ h5 {
   justify-content: center;
 }
 </style>
+@/useLoader

@@ -1,11 +1,11 @@
 import { reactive } from "vue";
-import type { Place } from "./types";
+import type { CompoundPlace } from "./types";
 
 interface Store {
   map: google.maps.Map | null;
   markers: google.maps.Marker[];
   infoWindows: google.maps.InfoWindow[];
-  places: Place[];
+  places: CompoundPlace[];
 }
 
 const store: Store = reactive({

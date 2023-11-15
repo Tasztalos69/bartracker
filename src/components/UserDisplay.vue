@@ -6,7 +6,9 @@ import { UserCircleIcon, LogoutIcon } from "vue-tabler-icons";
 const auth = useFirebaseAuth()!;
 const user = useCurrentUser();
 
-const logout = () => signOut(auth);
+const logout = () => {
+  signOut(auth);
+};
 </script>
 
 <template>
@@ -19,7 +21,8 @@ const logout = () => signOut(auth);
     <RouterLink to="login">Log in</RouterLink>
   </div>
   <div class="user" v-if="user">
-    <UserCircleIcon />
+    <img v-if="user.photoURL" :src="user.photoURL" />
+    <UserCircleIcon v-else />
     <h4>{{ user.email }}</h4>
     <button @click="logout"><LogoutIcon /></button>
   </div>
