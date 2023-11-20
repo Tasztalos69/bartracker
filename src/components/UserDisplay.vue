@@ -2,14 +2,17 @@
 import { OAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { useCurrentUser, useFirebaseAuth } from "vuefire";
 import { UserCircleIcon, LogoutIcon } from "vue-tabler-icons";
+import store from "@/store";
 
 const auth = useFirebaseAuth()!;
 const user = useCurrentUser();
 
 const provider = new OAuthProvider("oidc.wanter-id");
 
-const login = () =>
-  signInWithPopup(auth, provider).then(console.log).catch(console.error);
+const login = () => {
+  store.isUserLoading = true;
+  signInWithPopup(auth, provider).finally(() => (store.isUserLoading = false));
+};
 
 const logout = () => {
   signOut(auth);

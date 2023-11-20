@@ -6,8 +6,9 @@ import type { Visit } from "@/types";
 import { collection, limit, orderBy, query, where } from "firebase/firestore";
 import { computed } from "vue";
 import { RouterLink } from "vue-router";
-import { PlusIcon, ArrowNarrowRightIcon } from "vue-tabler-icons";
+import { PlusIcon, ArrowNarrowRightIcon, Loader2Icon } from "vue-tabler-icons";
 import { useCollection, useCurrentUser, useFirestore } from "vuefire";
+import store from "../store";
 
 const db = useFirestore();
 const user = useCurrentUser();
@@ -31,16 +32,21 @@ const visits = useCollection<Visit>(visitSource);
 <template>
   <UserDisplay />
 
-  <div class="latest" v-if="user && visits && visits[0]">
+  <div class="loader" v-if="store.isUserLoading">
+    <Loader2Icon size="48" />
+  </div>
+  <div class="latest" v-else-if="user && visits && visits[0]">
     <h3>Latest visit:</h3>
     <PlaceCard :place="{ ...visits[0].place, visits: [] }" hideVisits />
     <RouterLink to="list" class="list">
       <CTA variant="secondary"> View all <ArrowNarrowRightIcon /> </CTA>
     </RouterLink>
   </div>
-  <div v-if="!user" class="invite">
-    <h5>Track your bar visits easily with Bartracker!</h5>
+  <div v-else-if="!user" class="invite">
+    <img src="/bak.png" />
   </div>
+
+  <!-- Add btn -->
   <RouterLink to="add" class="add" v-if="user">
     <PlusIcon />Record visit
   </RouterLink>
@@ -72,21 +78,43 @@ const visits = useCollection<Visit>(visitSource);
   }
 }
 
-.invite {
+.invite,
+.loader {
   position: absolute;
   top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 70%;
+  text-align: center;
 
-  h5 {
-    font-weight: 700;
-    text-align: center;
-    font-size: 1.3rem;
-    line-height: 1.6rem;
-    color: $text-light;
-    font-style: italic;
+  //h5 {
+  //  font-weight: 700;
+  //  text-align: center;
+  //  font-size: 1.3rem;
+  //  line-height: 1.6rem;
+  //  color: $text-light;
+  //  font-style: italic;
+  //}
+
+  img {
+    display: inline-block;
+    width: 100px;
+    object-fit: cover;
+    opacity: 0.2;
   }
+}
+@keyframes rotating {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader .icon-tabler {
+  opacity: 0.8;
+  animation: rotating 1s linear infinite;
 }
 
 .add {
