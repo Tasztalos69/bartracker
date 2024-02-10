@@ -60,5 +60,9 @@ button {
       background: $text-light;
     }
   }
+
+  &.secondary {
+    background: $bg;
+  }
 }
 </style>
