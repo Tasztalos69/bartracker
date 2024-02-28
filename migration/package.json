@@ -1,0 +1,17 @@
+{
+  "name": "bartracker-migrate",
+  "module": "index.ts",
+  "scripts": {
+    "start": "esbuild index.ts --bundle --platform=node --target=node10.4 --outfile=dist.js && node dist.js"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "esbuild": "^0.19.5",
+    "firebase": "^10.6.0"
+  }
+}

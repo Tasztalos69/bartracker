@@ -34,3 +34,6 @@ coverage
 
 # PWA Dev
 dev-dist/
+
+# Migration
+dist.js
