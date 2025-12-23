@@ -37,8 +37,10 @@ watch(search, () => {
     <SearchIcon class="icon" size="24" />
     <input v-model="search" placeholder="Search" />
   </div>
-  <div class="places">
-    <PlaceCard v-for="p in filtered" :key="p.place_id" :place="p"></PlaceCard>
+  <div class="places-wrapper">
+    <div class="places">
+      <PlaceCard v-for="p in filtered" :key="p.place_id" :place="p"></PlaceCard>
+    </div>
   </div>
   <CTA variant="secondary" @click="router.push('/')">Go back</CTA>
 </template>
@@ -75,22 +77,16 @@ h2 {
   }
 }
 
-.places {
-  margin-top: 20px;
-  overflow: scroll;
-  max-height: 70%;
-  @media screen and (max-width: 700px) {
-    max-height: 70%;
-  }
+.places-wrapper {
+  overflow-y: auto;
+  /* max-height: 500px; */
 }
 
 .place-card:last-of-type {
   margin-bottom: 0;
 }
+
 .cta {
-  position: absolute;
-  bottom: 10px;
-  left: 10px;
-  width: calc(100% - 20px);
+  margin-bottom: 10px;
 }
 </style>

@@ -159,7 +159,7 @@ h2 {
 }
 
 .place-input {
-  margin-top: 30px;
+  margin-top: 10px;
 }
 
 h5 {

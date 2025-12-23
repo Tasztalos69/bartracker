@@ -45,11 +45,10 @@ const logout = () => {
   background: $bg-dark;
   padding: 10px 15px;
   border-radius: 7px;
-  margin-top: 10px;
-  margin-bottom: 20px;
   display: flex;
   align-items: center;
   cursor: pointer;
+  margin-bottom: 10px;
 
   svg {
     margin-right: 10px;
@@ -91,6 +90,11 @@ const logout = () => {
     height: 28px;
     border-radius: 9999px;
     margin-right: 10px;
+  }
+
+  button {
+    width: 24px;
+    height: 24px;
   }
 }
 

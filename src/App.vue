@@ -218,7 +218,10 @@ nav,
   padding: 0 15px;
   background: $bg;
   border-radius: 10px;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
 
   @media screen and (max-width: 700px) {
     z-index: 2;
@@ -231,7 +234,6 @@ nav,
 
   .title {
     margin-top: 7px;
-    margin-bottom: 20px;
     font-family: "Lobster", serif;
     text-align: center;
   }

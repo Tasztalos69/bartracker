@@ -57,7 +57,6 @@ const visits = useCollection<Visit>(visitSource);
 
 .latest {
   h3 {
-    margin-top: 30px;
     font-weight: 600;
   }
 
