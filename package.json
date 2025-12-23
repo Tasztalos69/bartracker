@@ -13,6 +13,7 @@
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.15.1",
     "firebase": "^9.15.0",
+    "swetrix-vue": "^2.0.1",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6",
     "vue-tabler-icons": "^2.17.0",
