@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.15.1",
+    "baseline-browser-mapping": "^2.9.11",
+    "caniuse-lite": "^1.0.30001761",
     "firebase": "^9.15.0",
     "swetrix-vue": "^2.0.1",
     "vue": "^3.2.45",
