@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { RouterView } from "vue-router";
-import { Menu2Icon, Focus2Icon } from "vue-tabler-icons";
+import { Menu2Icon, Focus2Icon, LocationIcon } from "vue-tabler-icons";
 import mapStyle from "./map-style.json";
 import markerIcon from "@/assets/marker.svg";
 import { BOUNDS, CENTER, DEFAULT_ZOOM } from "@/constants";
@@ -153,6 +153,72 @@ const recenter = () => {
   store.map.panTo(CENTER);
   store.map.setZoom(DEFAULT_ZOOM);
 };
+
+const here = ref<google.maps.LatLngLiteral | null>(null);
+let hereMarker: google.maps.Marker | null = null;
+let watchId: number | null = null;
+
+const drawHere = () => {
+  if (!store.map || !here.value) return;
+
+  hereMarker ??= new google.maps.Marker({
+    map: store.map,
+    clickable: false,
+    zIndex: 999,
+    icon: {
+      path: google.maps.SymbolPath.CIRCLE,
+      scale: 7,
+      fillColor: "#4285f4",
+      fillOpacity: 1,
+      strokeColor: "#ffffff",
+      strokeWeight: 3,
+    },
+  });
+  hereMarker.setPosition(here.value);
+};
+
+const moveTo = (pos: google.maps.LatLngLiteral) =>
+  store.map?.moveCamera({ center: pos, zoom: 16 });
+
+let centerOnFix = false;
+
+const watchMe = () => {
+  if (watchId !== null) return;
+  watchId = navigator.geolocation.watchPosition(
+    ({ coords }) => {
+      here.value = { lat: coords.latitude, lng: coords.longitude };
+      drawHere();
+      if (centerOnFix) {
+        centerOnFix = false;
+        moveTo(here.value);
+      }
+    },
+    // Denied, timed out or unavailable: tear the watch down so a later click
+    // starts a fresh one instead of stacking a second watch on top.
+    () => {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    },
+    { enableHighAccuracy: true, maximumAge: 30000, timeout: 10000 }
+  );
+};
+
+watch(
+  () => store.map,
+  async (map) => {
+    if (!map) return;
+    const perm = await navigator.permissions
+      ?.query({ name: "geolocation" })
+      .catch(() => null);
+    if (perm?.state === "granted") watchMe();
+  }
+);
+
+const goToMe = () => {
+  watchMe();
+  if (here.value) moveTo(here.value);
+  else centerOnFix = true;
+};
 </script>
 
 <template>
@@ -174,9 +240,14 @@ const recenter = () => {
       </Transition>
     </RouterView>
 
-    <button class="center-button" v-if="store.map" @click="recenter">
-      <Focus2Icon size="28" />
-    </button>
+    <div class="map-controls" v-if="store.map">
+      <button @click="recenter" aria-label="Center on Budapest">
+        <Focus2Icon size="28" />
+      </button>
+      <button @click="goToMe" aria-label="Center on my location">
+        <LocationIcon size="28" />
+      </button>
+    </div>
 
     <div id="map" ref="mapEl" />
   </template>
@@ -196,8 +267,7 @@ const recenter = () => {
 
 .ui,
 nav,
-.center-button {
-  position: relative;
+.map-controls {
   z-index: 2;
 }
 
@@ -248,23 +318,29 @@ nav,
   }
 }
 
-.center-button {
-  box-sizing: border-box;
+.map-controls {
   position: absolute;
   top: 10px;
   right: 10px;
-  padding: 5px;
-  width: 38px;
-  height: 38px;
-  border-radius: 3px;
-  background: $bg;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 
   @media screen and (max-width: 700px) {
     z-index: 1;
   }
 
-  * {
-    color: $text;
+  button {
+    box-sizing: border-box;
+    padding: 5px;
+    width: 38px;
+    height: 38px;
+    border-radius: 3px;
+    background: $bg;
+
+    * {
+      color: $text;
+    }
   }
 }
 
