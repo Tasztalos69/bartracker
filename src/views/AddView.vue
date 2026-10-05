@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /*global google */
 import { BOUNDS } from "@/constants";
-import { ref, type Ref } from "vue";
+import { ref, watch, type Ref } from "vue";
 import PlaceCard from "@/components/ResultCard.vue";
 import FormInput from "@/components/FormInput.vue";
 import CTA from "@/components/CTA.vue";
@@ -19,7 +19,7 @@ import {
   setDoc,
   Timestamp,
 } from "firebase/firestore";
-import loader from "@/useLoader";
+import useLoader from "@/useLoader";
 
 const router = useRouter();
 const db = useFirestore();
@@ -41,6 +41,7 @@ const handleChange = () => {
 };
 
 const handleQuery = async () => {
+  if (!service) return;
   if (queryString.length === 0) {
     results.value = null;
     selected.value = null;
@@ -62,10 +63,15 @@ const handleQuery = async () => {
 
 let service: google.maps.places.PlacesService;
 
-loader.importLibrary("places").then(({ PlacesService }) => {
-  if (!store.map) return;
-  service = new PlacesService(store.map);
-});
+watch(
+  () => store.map,
+  async (map) => {
+    if (!map || service) return;
+    const { PlacesService } = await (await useLoader()).importLibrary("places");
+    service = new PlacesService(map);
+  },
+  { immediate: true }
+);
 
 let selected = ref<google.maps.places.PlaceResult | null>(null);
 
@@ -184,4 +190,3 @@ h5 {
   justify-content: center;
 }
 </style>
-@/useLoader

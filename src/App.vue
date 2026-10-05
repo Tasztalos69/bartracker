@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { RouterView } from "vue-router";
 import { Menu2Icon, Focus2Icon } from "vue-tabler-icons";
 import mapStyle from "./map-style.json";
@@ -15,7 +15,7 @@ import {
 import { collection, orderBy, query, where } from "firebase/firestore";
 import geoPointToLatLng from "./geoPointToLatLng";
 import type { CompoundPlace, Visit } from "./types";
-import loader from "./useLoader";
+import useLoader from "./useLoader";
 
 const db = useFirestore();
 const user = useCurrentUser();
@@ -60,17 +60,20 @@ const mapOptions: google.maps.MapOptions = {
 };
 
 const glib = ref<google.maps.MapsLibrary | null>(null);
+const mapEl = ref<HTMLElement | null>(null);
 
-onMounted(() =>
-  loader.importLibrary("maps").then((g) => {
-    glib.value = g;
+const initMap = async () => {
+  if (!user.value || store.map) return;
 
-    store.map = new g.Map(
-      document.getElementById("map") as HTMLElement,
-      mapOptions
-    );
-  })
-);
+  const g = await (await useLoader()).importLibrary("maps");
+  await nextTick(); // #map only renders once there is a user
+
+  if (!mapEl.value) return;
+  glib.value = g;
+  store.map = new g.Map(mapEl.value, mapOptions);
+};
+
+watch(user, initMap, { immediate: true });
 
 const parseVisits = async () => {
   store.places = [];
@@ -166,11 +169,11 @@ const recenter = () => {
     </Transition>
   </RouterView>
 
-  <button class="center-button" @click="recenter">
+  <button class="center-button" v-if="store.map" @click="recenter">
     <Focus2Icon size="28" />
   </button>
 
-  <div id="map" />
+  <div id="map" ref="mapEl" v-if="user" />
 </template>
 
 <style scoped lang="scss">
@@ -284,4 +287,3 @@ nav,
   }
 }
 </style>
-./useLoader

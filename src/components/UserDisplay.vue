@@ -15,7 +15,7 @@ const login = () => {
 };
 
 const logout = () => {
-  signOut(auth);
+  signOut(auth).then(() => location.reload());
 };
 </script>
 
