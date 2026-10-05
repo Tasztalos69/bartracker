@@ -240,6 +240,8 @@ const goToMe = () => {
       </Transition>
     </RouterView>
 
+    <div id="map" ref="mapEl" />
+
     <div class="map-controls" v-if="store.map">
       <button @click="recenter" aria-label="Center on Budapest">
         <Focus2Icon size="28" />
@@ -248,8 +250,6 @@ const goToMe = () => {
         <LocationIcon size="28" />
       </button>
     </div>
-
-    <div id="map" ref="mapEl" />
   </template>
 </template>
 
