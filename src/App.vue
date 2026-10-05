@@ -16,6 +16,7 @@ import { collection, orderBy, query, where } from "firebase/firestore";
 import geoPointToLatLng from "./geoPointToLatLng";
 import type { CompoundPlace, Visit } from "./types";
 import useLoader from "./useLoader";
+import SignIn from "./components/SignIn.vue";
 
 const db = useFirestore();
 const user = useCurrentUser();
@@ -155,25 +156,30 @@ const recenter = () => {
 </script>
 
 <template>
-  <button class="menu-toggle" :class="{ open: isMenuOpen }">
-    <Menu2Icon size="32" @click="toggleMenu" />
-  </button>
+  <!-- Signed out (and while auth resolves): splash only, no app chrome. -->
+  <SignIn v-if="!user" />
 
-  <!-- UI -->
-  <RouterView v-slot="{ Component }">
-    <Transition name="fade">
-      <div class="ui" v-if="isMenuOpen">
-        <h1 class="title">Bartracker</h1>
-        <component :is="Component" />
-      </div>
-    </Transition>
-  </RouterView>
+  <template v-else>
+    <button class="menu-toggle" :class="{ open: isMenuOpen }">
+      <Menu2Icon size="32" @click="toggleMenu" />
+    </button>
 
-  <button class="center-button" v-if="store.map" @click="recenter">
-    <Focus2Icon size="28" />
-  </button>
+    <!-- UI -->
+    <RouterView v-slot="{ Component }">
+      <Transition name="fade">
+        <div class="ui" v-if="isMenuOpen">
+          <h1 class="title">Bartracker</h1>
+          <component :is="Component" />
+        </div>
+      </Transition>
+    </RouterView>
 
-  <div id="map" ref="mapEl" v-if="user" />
+    <button class="center-button" v-if="store.map" @click="recenter">
+      <Focus2Icon size="28" />
+    </button>
+
+    <div id="map" ref="mapEl" />
+  </template>
 </template>
 
 <style scoped lang="scss">

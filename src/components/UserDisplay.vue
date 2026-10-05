@@ -2,7 +2,6 @@
 import { OAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { useCurrentUser, useFirebaseAuth } from "vuefire";
 import { UserCircleIcon, LogoutIcon } from "vue-tabler-icons";
-import store from "@/store";
 
 const auth = useFirebaseAuth()!;
 const user = useCurrentUser();
@@ -10,8 +9,7 @@ const user = useCurrentUser();
 const provider = new OAuthProvider("oidc.wanter-id");
 
 const login = () => {
-  store.isUserLoading = true;
-  signInWithPopup(auth, provider).finally(() => (store.isUserLoading = false));
+  signInWithPopup(auth, provider);
 };
 
 const logout = () => {
@@ -24,10 +22,10 @@ const logout = () => {
     <UserCircleIcon />
     <span />
   </div>
-  <div class="user-unauth" v-if="user === null" @click="login">
+  <button class="user-unauth" type="button" v-if="user === null" @click="login">
     <UserCircleIcon />
     <p>Log in</p>
-  </div>
+  </button>
   <div class="user" v-if="user">
     <img v-if="user.photoURL" :src="user.photoURL" />
     <UserCircleIcon v-else />

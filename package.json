@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check build-only",
     "preview": "vite preview",
     "build-only": "vite build",
+    "deploy-only": "firebase deploy",
+    "build": "run-p type-check build-only",
+    "deploy": "run-p type-check build-only deploy-only",
+    "check-bundle": "sh scripts/check-bundle.sh",
     "type-check": "vue-tsc --noEmit",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },

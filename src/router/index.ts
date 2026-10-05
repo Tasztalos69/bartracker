@@ -11,12 +11,7 @@ router.beforeEach(async (to) => {
   if (to.meta.requiresAuth) {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-      return {
-        path: "/login",
-        query: {
-          redirectTo: to.fullPath,
-        },
-      };
+      return { path: "/", query: { redirectTo: to.fullPath } };
     }
   }
 });

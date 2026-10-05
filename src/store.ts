@@ -6,7 +6,6 @@ interface Store {
   markers: google.maps.Marker[];
   infoWindows: google.maps.InfoWindow[];
   places: CompoundPlace[];
-  isUserLoading: boolean;
 }
 
 const store: Store = reactive({
@@ -14,7 +13,6 @@ const store: Store = reactive({
   markers: [],
   infoWindows: [],
   places: [],
-  isUserLoading: false,
 });
 
 export default store;
