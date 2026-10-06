@@ -8,6 +8,11 @@
   color: $text;
 }
 
+// Matches the loading screen, so there is no step from white before Vue boots.
+body {
+  background: $bg;
+}
+
 svg * {
   color: inherit;
 }

@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { RouterView } from "vue-router";
-import { Menu2Icon, Focus2Icon, LocationIcon } from "vue-tabler-icons";
+import {
+  Menu2Icon,
+  Focus2Icon,
+  LocationIcon,
+  Loader2Icon,
+} from "vue-tabler-icons";
 import mapStyle from "./map-style.json";
 import markerIcon from "@/assets/marker.svg";
 import { BOUNDS, CENTER, DEFAULT_ZOOM } from "@/constants";
@@ -222,8 +227,11 @@ const goToMe = () => {
 </script>
 
 <template>
-  <!-- Signed out (and while auth resolves): splash only, no app chrome. -->
-  <SignIn v-if="!user" />
+  <div class="loading" v-if="user === undefined">
+    <Loader2Icon class="spinner" size="40" />
+  </div>
+
+  <SignIn v-else-if="user === null" />
 
   <template v-else>
     <button class="menu-toggle" :class="{ open: isMenuOpen }">
@@ -255,6 +263,26 @@ const goToMe = () => {
 
 <style scoped lang="scss">
 @import "@/styles/variables";
+
+.loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $bg;
+
+  .spinner {
+    color: rgba($text, 0.4);
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 #map {
   position: absolute;
